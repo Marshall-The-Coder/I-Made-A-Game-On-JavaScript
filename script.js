@@ -146,7 +146,10 @@ function gravity() {
 }
 
 function collisionBlock() {
-    if (player.x < block.x + block.width && player.x + player.width > block.x && player.y < block.y + block.height && player.y + player.height > block.y) {
+    if (player.x < block.x + block.width &&
+         player.x + player.width > block.x && 
+         player.y < block.y + block.height && 
+         player.y + player.height > block.y) {
         const overlapTop = (player.y + player.height) - block.y;
         const overlapBottom = (block.y + block.height) - player.y;
         const overlapLeft = (player.x + player.width) - block.x;
@@ -172,11 +175,9 @@ function collisionBlock() {
                 jumping = false;
             }
         }
-        // Left collision
         else if (minOverlap === overlapLeft) {
             player.x = block.x - player.width;
         }
-        // Right collision
         else if (minOverlap === overlapRight) {
             player.x = block.x + block.width;
         }
