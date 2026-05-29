@@ -120,6 +120,7 @@ function border() {
     }
     if (player.y < 0) {
         player.y = 0;
+        player.velocityY = 0;
     }
     if (block.x + block.width > canvas.width) {
         block.x = canvas.width - block.width;
@@ -156,7 +157,7 @@ function collisionBlock() {
         const overlapBottom = (block.y + block.height) - player.y;
 
         const overlapLeft = (player.x + player.width) - block.x;
-        
+
         const overlapRight = (block.x + block.width) - player.x;
         
         const minOverlap = Math.min(overlapTop,
