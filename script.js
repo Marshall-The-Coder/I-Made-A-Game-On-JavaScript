@@ -21,6 +21,13 @@ const block = {
     velocityY: 0
 };
 
+const House_Floor = {
+    x: 400,
+    y: canvas.height - 400,
+    width: 200,
+    height: 20
+}
+
 let GRAVITY = 0.5;
 let JUMP_STRENGTH = 15;
 let jumping = false;
@@ -30,6 +37,7 @@ let terminalVelocity = 20;
 let PlayerOnBlock = false;
 let BlockOnPlayer = false;
 let walljumpused = false;
+let PlayeroffsetX = 0;
 
 const keys = {};
 
@@ -99,6 +107,7 @@ function update() {
     border();
     gravity();
     collisionBlock();
+    collisionHouseFloor();
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.fillStyle = 'lime';
@@ -106,6 +115,9 @@ function update() {
 
     ctx.fillStyle = 'red';
     ctx.fillRect(block.x, block.y, block.width, block.height);
+
+    ctx.fillStyle = 'brown';
+    ctx.fillRect(House_Floor.x, House_Floor.y, House_Floor.width, House_Floor.height);
 
     requestAnimationFrame(update);
 }
@@ -210,6 +222,31 @@ function collisionBlock() {
     } else {
         PlayerOnBlock = false;
         BlockOnPlayer = false;
+    }
+}
+function collisionHouseFloor() {
+    if (player.x < House_Floor.x + House_Floor.width &&
+         player.x + player.width > House_Floor.x && 
+         player.y < House_Floor.y + House_Floor.height && 
+         player.y + player.height > House_Floor.y) {
+        const overlapTop = (player.y + player.height) - House_Floor.y;
+
+        const overlapBottom = (House_Floor.y + House_Floor.height) - player.y;
+
+        const overlapLeft = (player.x + player.width) - House_Floor.x;
+
+        const overlapRight = (House_Floor.x + House_Floor.width) - player.x;
+
+        const minOverlap = Math.min(overlapTop, overlapBottom, overlapLeft, overlapRight);
+
+        if (minOverlap === overlapTop) {
+            player.y = House_Floor.y - player.height;
+            if (player.velocityY > 0) {
+                player.velocityY = 0;
+            }
+            jumping = false;
+            walljumpused = false;
+        }
     }
 }
 
