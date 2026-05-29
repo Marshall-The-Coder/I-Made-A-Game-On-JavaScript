@@ -39,6 +39,7 @@ let BlockOnPlayer = false;
 let walljumpused = false;
 let PlayeroffsetX = 0;
 let player_house_bottom = false;
+let blockonhousefloor = false;
 
 const keys = {};
 
@@ -90,12 +91,12 @@ function update() {
     if (player.velocityY < terminalVelocity) {
         player.velocityY += GRAVITY;
     }
-    if (block.velocityY < (terminalVelocity - 15) && !PlayerOnBlock && !blockOnHouseFloor) {
+    if (block.velocityY < (terminalVelocity - 15) && !PlayerOnBlock && !blockonhousefloor) {
         block.velocityY += GRAVITY;
     }
 
     player.y += player.velocityY;
-    if (!PlayerOnBlock && !BlockOnPlayer) {
+    if (!PlayerOnBlock && !BlockOnPlayer && !blockonhousefloor) {
         block.y += block.velocityY;
     }
 
@@ -226,44 +227,30 @@ function collisionBlock() {
     }
 }
 function collisionHouseFloor() {
-    if (player.x < House_Floor.x + House_Floor.width &&
-         player.x + player.width > House_Floor.x && 
-         player.y < House_Floor.y + House_Floor.height && 
-         player.y + player.height > House_Floor.y) {
+    const playerColliding = player.x < House_Floor.x + House_Floor.width &&
+        player.x + player.width > House_Floor.x && 
+        player.y < House_Floor.y + House_Floor.height && 
+        player.y + player.height > House_Floor.y;
+
+    const blockColliding = block.x < House_Floor.x + House_Floor.width &&
+        block.x + block.width > House_Floor.x && 
+        block.y < House_Floor.y + House_Floor.height && 
+        block.y + block.height > House_Floor.y;
+
+    if (playerColliding) {
         const overlapTop = (player.y + player.height) - House_Floor.y;
-
         const overlapBottom = (House_Floor.y + House_Floor.height) - player.y;
-
         const overlapLeft = (player.x + player.width) - House_Floor.x;
-
         const overlapRight = (House_Floor.x + House_Floor.width) - player.x;
-
-        const overLapTopBlock = (block.y + block.height) - House_Floor.y;
-
-        const overLapBottomBlock = (House_Floor.y + House_Floor.height) - block.y;
-
-        const overLapLeftBlock = (block.x + block.width) - House_Floor.x;
-
-        const overLapRightBlock = (House_Floor.x + House_Floor.width) - block.x;
-
         const minOverlap = Math.min(overlapTop, overlapBottom, overlapLeft, overlapRight);
 
-        const minOverlapBlock = Math.min(overLapTopBlock, overLapBottomBlock, overLapLeftBlock, overLapRightBlock);
-
-        if (minOverlap === overlapTop || minOverlapBlock === overLapTopBlock) {
-            if (minOverlap === overlapTop) {
-                player.y = House_Floor.y - player.height;
-                if (player.velocityY > 0) {
-                    player.velocityY = 0;
-                }
-                jumping = false;
-                walljumpused = false;
+        if (minOverlap === overlapTop) {
+            player.y = House_Floor.y - player.height;
+            if (player.velocityY > 0) {
+                player.velocityY = 0;
             }
-            if (minOverlapBlock === overLapTopBlock) {
-                block.y = House_Floor.y - block.height;
-                block.velocityY = 0;
-                blockOnHouseFloor = true;
-            }
+            jumping = false;
+            walljumpused = false;
         }
         else if (minOverlap === overlapBottom) {
             player.y = House_Floor.y + House_Floor.height;
@@ -274,6 +261,22 @@ function collisionHouseFloor() {
         }
     } else {
         player_house_bottom = false;
+    }
+
+    if (blockColliding) {
+        const overLapTopBlock = (block.y + block.height) - House_Floor.y;
+        const overLapBottomBlock = (House_Floor.y + House_Floor.height) - block.y;
+        const overLapLeftBlock = (block.x + block.width) - House_Floor.x;
+        const overLapRightBlock = (House_Floor.x + House_Floor.width) - block.x;
+        const minOverlapBlock = Math.min(overLapTopBlock, overLapBottomBlock, overLapLeftBlock, overLapRightBlock);
+
+        if (minOverlapBlock === overLapTopBlock) {
+            block.y = House_Floor.y - block.height;
+            block.velocityY = 0;
+            blockonhousefloor = true;
+        }
+    } else {
+        blockonhousefloor = false;
     }
 }
 
