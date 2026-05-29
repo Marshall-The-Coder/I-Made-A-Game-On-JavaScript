@@ -28,6 +28,7 @@ let doubleJumpUsed = false;
 let jumpPressed = false;
 let terminalVelocity = 20;
 let PlayerOnBlock = false;
+let BlockOnPlayer = false;
 
 const keys = {};
 
@@ -84,7 +85,7 @@ function update() {
     }
 
     player.y += player.velocityY;
-    if (!PlayerOnBlock) {
+    if (!PlayerOnBlock && !BlockOnPlayer) {
         block.y += block.velocityY;
     }
 
@@ -180,8 +181,8 @@ function collisionBlock() {
             player.y = block.y + block.height;
             if (player.velocityY < 0) {
                 player.velocityY = 0;
-                jumping = false;
             }
+            BlockOnPlayer = true;
         }
         else if (minOverlap === overlapLeft) {
             player.x = block.x - player.width;
@@ -191,6 +192,7 @@ function collisionBlock() {
         }
     } else {
         PlayerOnBlock = false;
+        BlockOnPlayer = false;
     }
 }
 
