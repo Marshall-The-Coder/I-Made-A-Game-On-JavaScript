@@ -150,12 +150,19 @@ function collisionBlock() {
          player.x + player.width > block.x && 
          player.y < block.y + block.height && 
          player.y + player.height > block.y) {
+
         const overlapTop = (player.y + player.height) - block.y;
+
         const overlapBottom = (block.y + block.height) - player.y;
+
         const overlapLeft = (player.x + player.width) - block.x;
+        
         const overlapRight = (block.x + block.width) - player.x;
         
-        const minOverlap = Math.min(overlapTop, overlapBottom, overlapLeft, overlapRight);
+        const minOverlap = Math.min(overlapTop,
+             overlapBottom, 
+             overlapLeft, 
+             overlapRight);
         
         // Top collision
         if (minOverlap === overlapTop) {
