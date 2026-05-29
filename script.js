@@ -29,6 +29,7 @@ let jumpPressed = false;
 let terminalVelocity = 20;
 let PlayerOnBlock = false;
 let BlockOnPlayer = false;
+let walljumpused = false;
 
 const keys = {};
 
@@ -112,9 +113,17 @@ function update() {
 function border() {
     if (player.x + player.width > canvas.width) {
         player.x = canvas.width - player.width;
+        if (jumping && doubleJumpUsed && !walljumpused) {
+            doubleJumpUsed = false;
+            walljumpused = true;
+        }
     }
     if (player.x < 0) {
         player.x = 0;
+        if (jumping && doubleJumpUsed && !walljumpused) {
+            doubleJumpUsed = false;
+            walljumpused = true;
+        }
     }
     if (player.y + player.height > canvas.height) {
         player.y = canvas.height - player.height;
@@ -140,6 +149,7 @@ function gravity() {
     if (player.y >= canvas.height - player.height) {
         player.y = canvas.height - player.height;
         player.velocityY = 0;
+        walljumpused = false;
     }
     if (block.y >= canvas.height - block.height) {
         block.y = canvas.height - block.height;
@@ -165,18 +175,17 @@ function collisionBlock() {
              overlapBottom, 
              overlapLeft, 
              overlapRight);
-        
-        // Top collision
+
         if (minOverlap === overlapTop) {
             player.y = block.y - player.height;
             if (player.velocityY > 0) {
                 player.velocityY = 0;
                 jumping = false;
+                walljumpused = false;
             }
             PlayeroffsetX = player.x - block.x;
             PlayerOnBlock = true;
         }
-        // Bottom collision
         else if (minOverlap === overlapBottom) {
             player.y = block.y + block.height;
             if (player.velocityY < 0) {
@@ -186,9 +195,17 @@ function collisionBlock() {
         }
         else if (minOverlap === overlapLeft) {
             player.x = block.x - player.width;
+            if (jumping && doubleJumpUsed && !walljumpused) {
+                doubleJumpUsed = false;
+                walljumpused = true;
+            }
         }
         else if (minOverlap === overlapRight) {
             player.x = block.x + block.width;
+            if (jumping && doubleJumpUsed && !walljumpused) {
+                doubleJumpUsed = false;
+                walljumpused = true;
+            }
         }
     } else {
         PlayerOnBlock = false;
