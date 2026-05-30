@@ -18,7 +18,8 @@ const block = {
     y: canvas.height - 200,
     width: 100,
     height: 20,
-    velocityY: 0
+    velocityY: 0,
+    velocityX: 0
 };
 
 const House_Floor = {
@@ -40,6 +41,8 @@ let walljumpused = false;
 let PlayeroffsetX = 0;
 let player_house_bottom = false;
 let blockonhousefloor = false;
+let playeronhousefloor = false;
+let floating = false;
 
 const keys = {};
 
@@ -88,10 +91,29 @@ function update() {
         block.x += 5;
         player.x = block.x + PlayeroffsetX;
     }
+    if (!PlayerOnBlock && keys['t'] && !jumping && !blockonhousefloor && playeronhousefloor && block.y > (player.y + player.height)) {
+        const targetX = House_Floor.x + House_Floor.width;
+        const dx = targetX - block.x;
+        const maxSpeed = 5;
+        if (Math.abs(dx) <= 0.1) {
+            block.velocityX = 0;
+            block.x = targetX;
+            floating = true;
+            if (block.y > (canvas.height - 390)) {
+                block.velocityY -= 0.1;
+            } 
+            if (block.y <= (canvas.height - 390)) {
+                block.velocityY = 0;
+                block.y = House_Floor.y;
+            }
+        } else {
+            block.velocityX = Math.max(-maxSpeed, Math.min(maxSpeed, dx * 0.2));
+        }
+    }
     if (player.velocityY < terminalVelocity) {
         player.velocityY += GRAVITY;
     }
-    if (block.velocityY < (terminalVelocity - 15) && !PlayerOnBlock && !blockonhousefloor) {
+    if (block.velocityY < (terminalVelocity - 15) && !PlayerOnBlock && !blockonhousefloor && !floating) {
         block.velocityY += GRAVITY;
     }
 
@@ -105,6 +127,8 @@ function update() {
     } else {
         jumping = true;
     }
+
+    block.x += block.velocityX;
     
     border();
     gravity();
@@ -196,6 +220,7 @@ function collisionBlock() {
                 player.velocityY = 0;
                 jumping = false;
                 walljumpused = false;
+                floating = false;
             }
             PlayeroffsetX = player.x - block.x;
             PlayerOnBlock = true;
@@ -222,8 +247,10 @@ function collisionBlock() {
             }
         }
     } else {
-        PlayerOnBlock = false;
-        BlockOnPlayer = false;
+        if (!floating) {
+            PlayerOnBlock = false;
+        }
+            BlockOnPlayer = false;
     }
 }
 function collisionHouseFloor() {
@@ -251,6 +278,7 @@ function collisionHouseFloor() {
             }
             jumping = false;
             walljumpused = false;
+            playeronhousefloor = true;
         }
         else if (minOverlap === overlapBottom) {
             player.y = House_Floor.y + House_Floor.height;
@@ -259,8 +287,22 @@ function collisionHouseFloor() {
             }
             player_house_bottom = true;
         }
+        else if (minOverlap === overlapLeft) {
+            player.x = House_Floor.x - player.width;
+            if (jumping && doubleJumpUsed && !walljumpused) {
+                doubleJumpUsed = false;
+            }
+        }
+        else if (minOverlap === overlapRight) {
+            player.x = House_Floor.x + House_Floor.width;
+            if (jumping && doubleJumpUsed && !walljumpused) {
+                doubleJumpUsed = false;
+                walljumpused = true; 
+            }
+        }
     } else {
         player_house_bottom = false;
+        playeronhousefloor = false;
     }
 
     if (blockColliding) {
@@ -271,9 +313,23 @@ function collisionHouseFloor() {
         const minOverlapBlock = Math.min(overLapTopBlock, overLapBottomBlock, overLapLeftBlock, overLapRightBlock);
 
         if (minOverlapBlock === overLapTopBlock) {
-            block.y = House_Floor.y - block.height;
+            if (!floating || !keys['t']) {
+                block.y = House_Floor.y - block.height;
+                block.velocityY = 0;
+                blockonhousefloor = true;
+            } else {
+                blockonhousefloor = false;
+            }
+        }
+        else if (minOverlapBlock === overLapBottomBlock) {
+            block.y = House_Floor.y + House_Floor.height;
             block.velocityY = 0;
-            blockonhousefloor = true;
+        }
+        else if (minOverlapBlock === overLapLeftBlock) {
+            block.x = House_Floor.x - block.width;
+        }
+        else if (minOverlapBlock === overLapRightBlock) {
+            block.x = House_Floor.x + House_Floor.width;
         }
     } else {
         blockonhousefloor = false;
